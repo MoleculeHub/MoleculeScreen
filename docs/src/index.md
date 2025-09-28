@@ -1,6 +1,6 @@
 # MoleculeScreen.jl
 
-A Julia package for comprehensive molecular filtering and screening.
+A Julia package for molecular filtering and screening (both SMARTS and property-based).
 
 ## Installation
 
