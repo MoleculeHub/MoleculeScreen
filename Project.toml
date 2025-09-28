@@ -14,7 +14,7 @@ CSV = "0.10"
 DataFrames = "1.8.0"
 Documenter = "1.6"
 JuliaFormatter = "2.1.6"
-MoleculeFlow = "0.6.0"
+MoleculeFlow = "0.6"
 Test = "1"
 julia = "1.10"
 
