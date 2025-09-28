@@ -1,117 +1,289 @@
-# 1. Lipinski’s Rule of Five (Ro5, 1997)
+using MoleculeFlow
 
-# Goal: Estimate likelihood of good oral bioavailability.
+# Property-based filtering functions for drug-like compounds
 
-# Cutoffs (compounds tend to fail if 2 or more are violated):
+"""
+    lipinski_ro5(mol::Molecule) -> Bool
 
-# MW ≤ 500 Da
+Apply Lipinski's Rule of Five filter.
 
-# logP ≤ 5
+Compounds should satisfy at least 3 of 4 criteria:
 
-# H-bond donors ≤ 5
+  - Molecular weight ≤ 500 Da
+  - LogP ≤ 5
+  - H-bond donors ≤ 5
+  - H-bond acceptors ≤ 10
 
-# H-bond acceptors ≤ 10
+# Arguments
 
-# Logic: Absorption/permeability decreases when these properties are exceeded.
+  - `mol::Molecule`: Molecule to filter
 
-# Limitation: Not predictive of all oral drugs; exceptions exist (antibiotics, natural products).
+# Returns
 
-# 2. Veber’s Rules (2002)
+  - `Bool`: true if molecule passes (≤ 1 violation), false otherwise
+"""
+function lipinski_ro5(mol::Molecule)
+    !mol.valid && return false
 
-# Goal: Refine oral bioavailability prediction.
+    violations = 0
 
-# Cutoffs:
+    # MW ≤ 500 Da
+    violations += molecular_weight(mol) > 500 ? 1 : 0
 
-# Rotatable bonds ≤ 10
+    # logP ≤ 5
+    violations += logp(mol) > 5 ? 1 : 0
 
-# Polar surface area (TPSA) ≤ 140 Å²
+    # H-bond donors ≤ 5
+    violations += num_hbd(mol) > 5 ? 1 : 0
 
-# Logic: Fewer rotatable bonds = less conformational flexibility → better passive absorption.
+    # H-bond acceptors ≤ 10
+    violations += num_hba(mol) > 10 ? 1 : 0
 
-# Complement: Often applied with Ro5.
+    return violations <= 1
+end
 
-# 3. Ghose Filter (1999)
+"""
+    veber_rules(mol::Molecule) -> Bool
 
-# Goal: Define “drug-like chemical space.”
+Apply Veber's rules for oral bioavailability.
 
-# Cutoffs:
+Criteria:
 
-# MW: 160–480
+  - Rotatable bonds ≤ 10
+  - Topological polar surface area (TPSA) ≤ 140 Å²
 
-# logP: −0.4 to +5.6
+# Arguments
 
-# Molar refractivity: 40–130
+  - `mol::Molecule`: Molecule to filter
 
-# Atom count: 20–70
+# Returns
 
-# Logic: Combines lipophilicity, size, and polarizability.
+  - `Bool`: true if molecule passes both criteria, false otherwise
+"""
+function veber_rules(mol::Molecule)
+    !mol.valid && return false
 
-# Application: Early screening libraries.
+    return num_rotatable_bonds(mol) <= 10 && tpsa(mol) <= 140
+end
 
-# 4. Egan’s Filter (2000)
+"""
+    ghose_filter(mol::Molecule) -> Bool
 
-# Goal: Predict passive permeability and oral absorption.
+Apply Ghose filter for drug-like chemical space.
 
-# Cutoffs:
+Criteria:
 
-# logP ≤ 5.88
+  - MW: 160–480 Da
+  - LogP: -0.4 to +5.6
+  - Molar refractivity: 40–130
+  - Heavy atom count: 20–70
 
-# TPSA ≤ 131 Å²
+# Arguments
 
-# Logic: Plotting logP vs TPSA defines an “absorption ellipse.”
+  - `mol::Molecule`: Molecule to filter
 
-# Usage: Quick oral absorption check.
+# Returns
 
-# 5. Muegge Filter (2001)
+  - `Bool`: true if molecule passes all criteria, false otherwise
+"""
+function ghose_filter(mol::Molecule)
+    !mol.valid && return false
 
-# Goal: General drug-likeness filter (implemented in “Druglikeness Rules”).
+    mw = molecular_weight(mol)
+    lp = logp(mol)
+    mr = molecular_weight(mol) * 0.3
+    hac = heavy_atom_count(mol)
 
-# Cutoffs:
+    return (160 <= mw <= 480) &&
+           (-0.4 <= lp <= 5.6) &&
+           (40 <= mr <= 130) &&
+           (20 <= hac <= 70)
+end
 
-# MW: 200–600
+"""
+    egan_filter(mol::Molecule) -> Bool
 
-# logP: −2 to 5
+Apply Egan's filter for passive permeability.
 
-# TPSA ≤ 150 Å²
+Criteria:
 
-# Rotatable bonds ≤ 15
+  - LogP ≤ 5.88
+  - TPSA ≤ 131 Å²
 
-# HBD ≤ 5, HBA ≤ 10
+# Arguments
 
-# Logic: Broader ranges than Ro5; excludes very small or very large molecules.
+  - `mol::Molecule`: Molecule to filter
 
-# 6. Pfizer’s 3/75 Rule (2001, internal attrition analysis)
+# Returns
 
-# Goal: Identify compounds prone to safety attrition.
+  - `Bool`: true if molecule passes both criteria, false otherwise
+"""
+function egan_filter(mol::Molecule)
+    !mol.valid && return false
 
-# Cutoffs:
+    return logp(mol) <= 5.88 && tpsa(mol) <= 131
+end
 
-# logD (at pH 7.4) > 3
+"""
+    muegge_filter(mol::Molecule) -> Bool
 
-# TPSA < 75 Å²
+Apply Muegge filter for general drug-likeness.
 
-# Logic: High lipophilicity + low polarity = higher risk of hERG binding, poor clearance.
+Criteria:
 
-# 7. GSK’s 4/400 Rule (GlaxoSmithKline)
+  - MW: 200–600 Da
+  - LogP: -2 to 5
+  - TPSA ≤ 150 Å²
+  - Rotatable bonds ≤ 15
+  - H-bond donors ≤ 5
+  - H-bond acceptors ≤ 10
 
-# Goal: Improve CNS drug quality.
+# Arguments
 
-# Cutoffs:
+  - `mol::Molecule`: Molecule to filter
 
-# H-bond donors ≤ 4
+# Returns
 
-# MW ≤ 400 Da
+  - `Bool`: true if molecule passes all criteria, false otherwise
+"""
+function muegge_filter(mol::Molecule)
+    !mol.valid && return false
 
-# Logic: Lower MW and fewer donors = better brain penetration.
+    mw = molecular_weight(mol)
+    lp = logp(mol)
+    tps = tpsa(mol)
+    rb = num_rotatable_bonds(mol)
+    hbd = num_hbd(mol)
+    hba = num_hba(mol)
 
-# 8. Golden Triangle (Gleeson, 2008)
+    return (200 <= mw <= 600) &&
+           (-2 <= lp <= 5) &&
+           (tps <= 150) &&
+           (rb <= 15) &&
+           (hbd <= 5) &&
+           (hba <= 10)
+end
 
-# Goal: Define “sweet spot” for potency and ADMET.
+"""
+    pfizer_3_75_rule(mol::Molecule) -> Bool
 
-# Optimal window:
+Apply Pfizer's 3/75 rule to identify compounds prone to safety issues.
 
-# logD: −0.5 to 4.5
+Compounds are flagged as potentially problematic if:
 
-# MW: 200–500 Da
+  - LogP > 3 AND TPSA < 75 Å²
 
-# Logic: Plotted as a triangle on MW vs logD chart — hits outside triangle are less likely to progress.
+# Arguments
+
+  - `mol::Molecule`: Molecule to filter
+
+# Returns
+
+  - `Bool`: true if molecule passes (not flagged), false if flagged as problematic
+"""
+function pfizer_3_75_rule(mol::Molecule)
+    !mol.valid && return false
+
+    # Return false if compound is flagged (LogP > 3 AND TPSA < 75)
+    return !(logp(mol) > 3 && tpsa(mol) < 75)
+end
+
+"""
+    gsk_4_400_rule(mol::Molecule) -> Bool
+
+Apply GSK's 4/400 rule for CNS drug quality.
+
+Criteria:
+
+  - H-bond donors ≤ 4
+  - MW ≤ 400 Da
+
+# Arguments
+
+  - `mol::Molecule`: Molecule to filter
+
+# Returns
+
+  - `Bool`: true if molecule passes both criteria, false otherwise
+"""
+function gsk_4_400_rule(mol::Molecule)
+    !mol.valid && return false
+
+    return num_hbd(mol) <= 4 && molecular_weight(mol) <= 400
+end
+
+"""
+    golden_triangle(mol::Molecule) -> Bool
+
+Apply Golden Triangle filter for optimal ADMET properties.
+
+Criteria:
+
+  - LogP: -0.5 to 4.5
+  - MW: 200–500 Da
+
+# Arguments
+
+  - `mol::Molecule`: Molecule to filter
+
+# Returns
+
+  - `Bool`: true if molecule is in the golden triangle, false otherwise
+"""
+function golden_triangle(mol::Molecule)
+    !mol.valid && return false
+
+    lp = logp(mol)
+    mw = molecular_weight(mol)
+
+    return (-0.5 <= lp <= 4.5) && (200 <= mw <= 500)
+end
+
+"""
+    apply_property_filters(mol::Molecule; filters::Vector{Symbol}=[:lipinski]) -> Dict{Symbol, Bool}
+
+Apply multiple property-based filters to a molecule.
+
+# Arguments
+
+  - `mol::Molecule`: Molecule to filter
+  - `filters::Vector{Symbol}`: List of filters to apply
+
+Available filters:
+
+  - `:lipinski` - Lipinski's Rule of Five
+  - `:veber` - Veber's rules
+  - `:ghose` - Ghose filter
+  - `:egan` - Egan's filter
+  - `:muegge` - Muegge filter
+  - `:pfizer` - Pfizer's 3/75 rule
+  - `:gsk` - GSK's 4/400 rule
+  - `:golden_triangle` - Golden Triangle
+
+# Returns
+
+  - `Dict{Symbol, Bool}`: Dictionary mapping filter names to results
+"""
+function apply_property_filters(mol::Molecule; filters::Vector{Symbol} = [:lipinski])
+    filter_functions = Dict(
+        :lipinski => lipinski_ro5,
+        :veber => veber_rules,
+        :ghose => ghose_filter,
+        :egan => egan_filter,
+        :muegge => muegge_filter,
+        :pfizer => pfizer_3_75_rule,
+        :gsk => gsk_4_400_rule,
+        :golden_triangle => golden_triangle,
+    )
+
+    results = Dict{Symbol, Bool}()
+    for filter_name in filters
+        if haskey(filter_functions, filter_name)
+            results[filter_name] = filter_functions[filter_name](mol)
+        else
+            @warn "Unknown filter: $filter_name"
+        end
+    end
+
+    return results
+end

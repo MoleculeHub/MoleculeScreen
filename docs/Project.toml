@@ -1,0 +1,7 @@
+[deps]
+Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
+MoleculeScreen = "12345678-1234-1234-1234-123456789012"
+MoleculeFlow = "0907176b-47b3-4e96-be91-0e9bb91fb14f"
+
+[compat]
+Documenter = "1.6"
