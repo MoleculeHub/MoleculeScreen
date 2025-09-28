@@ -9,7 +9,7 @@ makedocs(;
     sitename="MoleculeScreen.jl",
     format=Documenter.HTML(;
         prettyurls=get(ENV, "CI", "false") == "true",
-        canonical="https://moleculehub.github.io/MoleculeScreen.jl",
+        canonical="https://MoleculeHub.github.io/MoleculeScreen",
         edit_link="main",
         assets=String[],
     ),
@@ -22,6 +22,6 @@ makedocs(;
 )
 
 deploydocs(;
-    repo="github.com/moleculehub/MoleculeScreen.jl",
+    repo="github.com/MoleculeHub/MoleculeScreen.git",
     devbranch="main",
 )
