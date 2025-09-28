@@ -15,7 +15,9 @@ using MoleculeFlow
         ethanol = mol_from_smiles("CCO")
         @test check_smarts_filter(ethanol, "pains") isa Bool
 
-        @test_logs (:warn, r"Unknown SMARTS filter") check_smarts_filter(ethanol, "nonexistent_filter")
+        @test_logs (:warn, r"Unknown SMARTS filter") check_smarts_filter(
+            ethanol, "nonexistent_filter"
+        )
     end
 
     @testset "Rule set sizes" begin

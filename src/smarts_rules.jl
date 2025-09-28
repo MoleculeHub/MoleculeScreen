@@ -38,7 +38,8 @@ const SMARTS_RULES = load_smarts_rules()
 Get a list of all available SMARTS filter names loaded from the CSV file.
 
 # Returns
-- `Vector{String}`: List of available filter names
+
+  - `Vector{String}`: List of available filter names
 """
 function get_available_smarts_filters()
     return collect(keys(SMARTS_RULES))
@@ -50,24 +51,27 @@ end
 Check if a molecule passes a specific SMARTS-based filter.
 
 # Arguments
-- `mol::Molecule`: Molecule to check
-- `filter_name::String`: Name of the filter to apply (case-insensitive)
+
+  - `mol::Molecule`: Molecule to check
+  - `filter_name::String`: Name of the filter to apply (case-insensitive)
 
 Available filters (loaded from data/rules_data.csv):
-- "pains" - Pan-Assay Interference Compounds
-- "elililly" - Eli Lilly filters 
-- "surechembl" - SureChEMBL reactivity alerts 
-- "mlsmr" - MLSMR filters 
-- "bms" - Bristol-Myers Squibb filters 
-- "brenk" - Brenk filter for unwanted functional groups 
-- "inpharmatica" - Inpharmatica filters 
-- "glaxo" - GlaxoSmithKline filters 
-- "lint" - Lilly LINT filters 
+
+  - "pains" - Pan-Assay Interference Compounds
+  - "elililly" - Eli Lilly filters
+  - "surechembl" - SureChEMBL reactivity alerts
+  - "mlsmr" - MLSMR filters
+  - "bms" - Bristol-Myers Squibb filters
+  - "brenk" - Brenk filter for unwanted functional groups
+  - "inpharmatica" - Inpharmatica filters
+  - "glaxo" - GlaxoSmithKline filters
+  - "lint" - Lilly LINT filters
 
 Use `get_available_smarts_filters()` to see all loaded filter names.
 
 # Returns
-- `Bool`: true if molecule passes (no alerts), false if molecule contains unwanted substructures
+
+  - `Bool`: true if molecule passes (no alerts), false if molecule contains unwanted substructures
 """
 function check_smarts_filter(mol::Molecule, filter_name::String)
     !mol.valid && return false
@@ -86,7 +90,7 @@ function check_smarts_filter(mol::Molecule, filter_name::String)
     for pattern in patterns
         try
             if has_substructure_match(mol, pattern)
-                return false  
+                return false
             end
         catch e
             @warn "Error checking pattern '$pattern' in filter '$filter_name': $e"
@@ -94,7 +98,7 @@ function check_smarts_filter(mol::Molecule, filter_name::String)
         end
     end
 
-    return true  
+    return true
 end
 
 """
@@ -103,13 +107,15 @@ end
 Apply multiple SMARTS-based filters to a molecule.
 
 # Arguments
-- `mol::Molecule`: Molecule to filter
-- `filters::Vector{String}`: List of SMARTS filters to apply
+
+  - `mol::Molecule`: Molecule to filter
+  - `filters::Vector{String}`: List of SMARTS filters to apply
 
 # Returns
-- `Dict{String, Bool}`: Dictionary mapping filter names to results (true = pass, false = fail)
+
+  - `Dict{String, Bool}`: Dictionary mapping filter names to results (true = pass, false = fail)
 """
-function apply_smarts_filters(mol::Molecule; filters::Vector{String}=["pains"])
+function apply_smarts_filters(mol::Molecule; filters::Vector{String} = ["pains"])
     results = Dict{String, Bool}()
 
     for filter_name in filters
@@ -125,11 +131,13 @@ end
 Get the specific SMARTS patterns that match in a molecule for a given filter.
 
 # Arguments
-- `mol::Molecule`: Molecule to check
-- `filter_name::String`: Name of the filter to check
+
+  - `mol::Molecule`: Molecule to check
+  - `filter_name::String`: Name of the filter to check
 
 # Returns
-- `Vector{String}`: List of SMARTS patterns that match (violations)
+
+  - `Vector{String}`: List of SMARTS patterns that match (violations)
 """
 function get_smarts_violations(mol::Molecule, filter_name::String)
     !mol.valid && return String[]
@@ -165,13 +173,17 @@ end
 Check if a molecule is "clean" (passes all specified SMARTS filters).
 
 # Arguments
-- `mol::Molecule`: Molecule to check
-- `smarts_filters::Vector{String}`: List of SMARTS filters to apply
+
+  - `mol::Molecule`: Molecule to check
+  - `smarts_filters::Vector{String}`: List of SMARTS filters to apply
 
 # Returns
-- `Bool`: true if molecule passes all filters, false otherwise
+
+  - `Bool`: true if molecule passes all filters, false otherwise
 """
-function is_clean_molecule(mol::Molecule; smarts_filters::Vector{String}=["pains", "brenk"])
-    results = apply_smarts_filters(mol; filters=smarts_filters)
+function is_clean_molecule(
+    mol::Molecule; smarts_filters::Vector{String} = ["pains", "brenk"]
+)
+    results = apply_smarts_filters(mol; filters = smarts_filters)
     return all(values(results))
 end

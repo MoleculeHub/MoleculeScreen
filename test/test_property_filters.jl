@@ -20,9 +20,9 @@ using MoleculeFlow
     end
 
     @testset "Ghose Filter" begin
-        @test ghose_filter(ethanol) == false  
-        @test ghose_filter(aspirin) isa Bool  
-        @test ghose_filter(caffeine) isa Bool  
+        @test ghose_filter(ethanol) == false
+        @test ghose_filter(aspirin) isa Bool
+        @test ghose_filter(caffeine) isa Bool
     end
 
     @testset "Egan Filter" begin
@@ -32,14 +32,14 @@ using MoleculeFlow
     end
 
     @testset "Golden Triangle" begin
-        @test golden_triangle(ethanol) == false 
-        @test golden_triangle(aspirin) isa Bool 
+        @test golden_triangle(ethanol) == false
+        @test golden_triangle(aspirin) isa Bool
         @test golden_triangle(caffeine) isa Bool
     end
 
     @testset "Apply multiple filters" begin
         filters = [:lipinski, :veber, :egan]
-        results = apply_property_filters(aspirin; filters=filters)
+        results = apply_property_filters(aspirin; filters = filters)
 
         @test haskey(results, :lipinski)
         @test haskey(results, :veber)

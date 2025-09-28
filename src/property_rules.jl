@@ -8,16 +8,19 @@ using MoleculeFlow
 Apply Lipinski's Rule of Five filter.
 
 Compounds should satisfy at least 3 of 4 criteria:
-- Molecular weight ≤ 500 Da
-- LogP ≤ 5
-- H-bond donors ≤ 5
-- H-bond acceptors ≤ 10
+
+  - Molecular weight ≤ 500 Da
+  - LogP ≤ 5
+  - H-bond donors ≤ 5
+  - H-bond acceptors ≤ 10
 
 # Arguments
-- `mol::Molecule`: Molecule to filter
+
+  - `mol::Molecule`: Molecule to filter
 
 # Returns
-- `Bool`: true if molecule passes (≤ 1 violation), false otherwise
+
+  - `Bool`: true if molecule passes (≤ 1 violation), false otherwise
 """
 function lipinski_ro5(mol::Molecule)
     !mol.valid && return false
@@ -45,14 +48,17 @@ end
 Apply Veber's rules for oral bioavailability.
 
 Criteria:
-- Rotatable bonds ≤ 10
-- Topological polar surface area (TPSA) ≤ 140 Å²
+
+  - Rotatable bonds ≤ 10
+  - Topological polar surface area (TPSA) ≤ 140 Å²
 
 # Arguments
-- `mol::Molecule`: Molecule to filter
+
+  - `mol::Molecule`: Molecule to filter
 
 # Returns
-- `Bool`: true if molecule passes both criteria, false otherwise
+
+  - `Bool`: true if molecule passes both criteria, false otherwise
 """
 function veber_rules(mol::Molecule)
     !mol.valid && return false
@@ -66,16 +72,19 @@ end
 Apply Ghose filter for drug-like chemical space.
 
 Criteria:
-- MW: 160–480 Da
-- LogP: -0.4 to +5.6
-- Molar refractivity: 40–130
-- Heavy atom count: 20–70
+
+  - MW: 160–480 Da
+  - LogP: -0.4 to +5.6
+  - Molar refractivity: 40–130
+  - Heavy atom count: 20–70
 
 # Arguments
-- `mol::Molecule`: Molecule to filter
+
+  - `mol::Molecule`: Molecule to filter
 
 # Returns
-- `Bool`: true if molecule passes all criteria, false otherwise
+
+  - `Bool`: true if molecule passes all criteria, false otherwise
 """
 function ghose_filter(mol::Molecule)
     !mol.valid && return false
@@ -85,7 +94,10 @@ function ghose_filter(mol::Molecule)
     mr = molecular_weight(mol) * 0.3
     hac = heavy_atom_count(mol)
 
-    return (160 <= mw <= 480) && (-0.4 <= lp <= 5.6) && (40 <= mr <= 130) && (20 <= hac <= 70)
+    return (160 <= mw <= 480) &&
+           (-0.4 <= lp <= 5.6) &&
+           (40 <= mr <= 130) &&
+           (20 <= hac <= 70)
 end
 
 """
@@ -94,14 +106,17 @@ end
 Apply Egan's filter for passive permeability.
 
 Criteria:
-- LogP ≤ 5.88
-- TPSA ≤ 131 Å²
+
+  - LogP ≤ 5.88
+  - TPSA ≤ 131 Å²
 
 # Arguments
-- `mol::Molecule`: Molecule to filter
+
+  - `mol::Molecule`: Molecule to filter
 
 # Returns
-- `Bool`: true if molecule passes both criteria, false otherwise
+
+  - `Bool`: true if molecule passes both criteria, false otherwise
 """
 function egan_filter(mol::Molecule)
     !mol.valid && return false
@@ -115,18 +130,21 @@ end
 Apply Muegge filter for general drug-likeness.
 
 Criteria:
-- MW: 200–600 Da
-- LogP: -2 to 5
-- TPSA ≤ 150 Å²
-- Rotatable bonds ≤ 15
-- H-bond donors ≤ 5
-- H-bond acceptors ≤ 10
+
+  - MW: 200–600 Da
+  - LogP: -2 to 5
+  - TPSA ≤ 150 Å²
+  - Rotatable bonds ≤ 15
+  - H-bond donors ≤ 5
+  - H-bond acceptors ≤ 10
 
 # Arguments
-- `mol::Molecule`: Molecule to filter
+
+  - `mol::Molecule`: Molecule to filter
 
 # Returns
-- `Bool`: true if molecule passes all criteria, false otherwise
+
+  - `Bool`: true if molecule passes all criteria, false otherwise
 """
 function muegge_filter(mol::Molecule)
     !mol.valid && return false
@@ -138,7 +156,12 @@ function muegge_filter(mol::Molecule)
     hbd = num_hbd(mol)
     hba = num_hba(mol)
 
-    return (200 <= mw <= 600) && (-2 <= lp <= 5) && (tps <= 150) && (rb <= 15) && (hbd <= 5) && (hba <= 10)
+    return (200 <= mw <= 600) &&
+           (-2 <= lp <= 5) &&
+           (tps <= 150) &&
+           (rb <= 15) &&
+           (hbd <= 5) &&
+           (hba <= 10)
 end
 
 """
@@ -147,13 +170,16 @@ end
 Apply Pfizer's 3/75 rule to identify compounds prone to safety issues.
 
 Compounds are flagged as potentially problematic if:
-- LogP > 3 AND TPSA < 75 Å²
+
+  - LogP > 3 AND TPSA < 75 Å²
 
 # Arguments
-- `mol::Molecule`: Molecule to filter
+
+  - `mol::Molecule`: Molecule to filter
 
 # Returns
-- `Bool`: true if molecule passes (not flagged), false if flagged as problematic
+
+  - `Bool`: true if molecule passes (not flagged), false if flagged as problematic
 """
 function pfizer_3_75_rule(mol::Molecule)
     !mol.valid && return false
@@ -168,14 +194,17 @@ end
 Apply GSK's 4/400 rule for CNS drug quality.
 
 Criteria:
-- H-bond donors ≤ 4
-- MW ≤ 400 Da
+
+  - H-bond donors ≤ 4
+  - MW ≤ 400 Da
 
 # Arguments
-- `mol::Molecule`: Molecule to filter
+
+  - `mol::Molecule`: Molecule to filter
 
 # Returns
-- `Bool`: true if molecule passes both criteria, false otherwise
+
+  - `Bool`: true if molecule passes both criteria, false otherwise
 """
 function gsk_4_400_rule(mol::Molecule)
     !mol.valid && return false
@@ -189,14 +218,17 @@ end
 Apply Golden Triangle filter for optimal ADMET properties.
 
 Criteria:
-- LogP: -0.5 to 4.5
-- MW: 200–500 Da
+
+  - LogP: -0.5 to 4.5
+  - MW: 200–500 Da
 
 # Arguments
-- `mol::Molecule`: Molecule to filter
+
+  - `mol::Molecule`: Molecule to filter
 
 # Returns
-- `Bool`: true if molecule is in the golden triangle, false otherwise
+
+  - `Bool`: true if molecule is in the golden triangle, false otherwise
 """
 function golden_triangle(mol::Molecule)
     !mol.valid && return false
@@ -213,23 +245,26 @@ end
 Apply multiple property-based filters to a molecule.
 
 # Arguments
-- `mol::Molecule`: Molecule to filter
-- `filters::Vector{Symbol}`: List of filters to apply
+
+  - `mol::Molecule`: Molecule to filter
+  - `filters::Vector{Symbol}`: List of filters to apply
 
 Available filters:
-- `:lipinski` - Lipinski's Rule of Five
-- `:veber` - Veber's rules
-- `:ghose` - Ghose filter
-- `:egan` - Egan's filter
-- `:muegge` - Muegge filter
-- `:pfizer` - Pfizer's 3/75 rule
-- `:gsk` - GSK's 4/400 rule
-- `:golden_triangle` - Golden Triangle
+
+  - `:lipinski` - Lipinski's Rule of Five
+  - `:veber` - Veber's rules
+  - `:ghose` - Ghose filter
+  - `:egan` - Egan's filter
+  - `:muegge` - Muegge filter
+  - `:pfizer` - Pfizer's 3/75 rule
+  - `:gsk` - GSK's 4/400 rule
+  - `:golden_triangle` - Golden Triangle
 
 # Returns
-- `Dict{Symbol, Bool}`: Dictionary mapping filter names to results
+
+  - `Dict{Symbol, Bool}`: Dictionary mapping filter names to results
 """
-function apply_property_filters(mol::Molecule; filters::Vector{Symbol}=[:lipinski])
+function apply_property_filters(mol::Molecule; filters::Vector{Symbol} = [:lipinski])
     filter_functions = Dict(
         :lipinski => lipinski_ro5,
         :veber => veber_rules,
@@ -238,7 +273,7 @@ function apply_property_filters(mol::Molecule; filters::Vector{Symbol}=[:lipinsk
         :muegge => muegge_filter,
         :pfizer => pfizer_3_75_rule,
         :gsk => gsk_4_400_rule,
-        :golden_triangle => golden_triangle
+        :golden_triangle => golden_triangle,
     )
 
     results = Dict{Symbol, Bool}()
