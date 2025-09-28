@@ -3,10 +3,10 @@ using MoleculeScreen
 using MoleculeFlow
 using DataFrames
 using CSV
-using Aqua
 
 @testset "MoleculeScreen.jl" begin
     @testset "Aqua.jl quality assurance" begin
+        using Aqua
         Aqua.test_all(MoleculeScreen)
     end
 

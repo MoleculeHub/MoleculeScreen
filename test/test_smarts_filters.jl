@@ -43,10 +43,12 @@ using MoleculeFlow
 
         @test haskey(results, "pains")
         @test haskey(results, "brenk")
-        @test all(values(results))
+        @test all(r["pass"] for r in values(results))
 
         results_aniline = apply_smarts_filters(aniline; filters = filters)
         @test haskey(results_aniline, "pains")
+        @test haskey(results_aniline["pains"], "pass")
+        @test haskey(results_aniline["pains"], "violations")
     end
 
     @testset "Clean molecule check" begin

@@ -1,3 +1,8 @@
+# Examples
+
+## Drug Screening Examples
+
+```julia
 using MoleculeScreen
 using MoleculeFlow
 
@@ -36,7 +41,13 @@ for (smiles, name) in drugs
         end
     end
 end
+```
 
+## Error Handling Examples
+
+### Robust Pipeline
+
+```julia
 function production_screening(smiles_list; log_errors=true)
     results = []
     errors = []
@@ -82,3 +93,4 @@ println("Errors encountered: $(length(screening_output.errors))")
 for error in screening_output.errors
     println("Error at index $(error.index): $(error.error)")
 end
+```

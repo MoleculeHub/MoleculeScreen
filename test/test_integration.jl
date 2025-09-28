@@ -9,19 +9,19 @@ using MoleculeFlow
     large_mol = mol_from_smiles("CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC")
 
     @testset "Full molecule screening" begin
-        results = screen_molecule(ethanol)
+        results = screen_molecules(ethanol)
         @test results["molecule_valid"] == true
         @test results["property_pass"] == true
         @test results["smarts_pass"] == true
         @test results["overall_pass"] == true
 
-        results_aniline = screen_molecule(aniline)
+        results_aniline = screen_molecules(aniline)
         @test results_aniline["molecule_valid"] == true
         @test results_aniline["property_pass"] == true
         @test results_aniline["smarts_pass"] isa Bool
         @test results_aniline["overall_pass"] isa Bool
 
-        results_custom = screen_molecule(
+        results_custom = screen_molecules(
             aspirin;
             property_filters = [:lipinski, :veber],
             smarts_filters = ["pains", "brenk"],
@@ -30,36 +30,36 @@ using MoleculeFlow
         @test haskey(results_custom["property_filters"], :veber)
         @test haskey(results_custom["smarts_filters"], "pains")
         @test haskey(results_custom["smarts_filters"], "brenk")
+        @test haskey(results_custom["smarts_filters"]["pains"], "pass")
+        @test haskey(results_custom["smarts_filters"]["pains"], "violations")
     end
 
-    @testset "Bulk molecule filtering" begin
+    @testset "Bulk molecule screening" begin
         molecules = Union{Molecule, Missing}[ethanol, aspirin, aniline, large_mol]
 
-        filtered = filter_molecules(molecules)
-        @test length(filtered) <= length(molecules)
+        results = screen_molecules(molecules)
+        @test length(results) == length(molecules)
 
-        detailed = filter_molecules(molecules; return_detailed = true)
-        @test nrow(detailed) == length(molecules)
-        @test hasproperty(detailed, :index)
-        @test hasproperty(detailed, :molecule_valid)
-        @test hasproperty(detailed, :property_pass)
-        @test hasproperty(detailed, :smarts_pass)
-        @test hasproperty(detailed, :overall_pass)
+        for result in results
+            @test haskey(result, "index")
+            @test haskey(result, "molecule_valid")
+            @test haskey(result, "property_pass")
+            @test haskey(result, "smarts_pass")
+            @test haskey(result, "overall_pass")
+        end
 
-        filtered_custom = filter_molecules(
+        results_custom = screen_molecules(
             molecules; property_filters = [:lipinski], smarts_filters = ["pains"]
         )
-        @test length(filtered_custom) >= 1
+        @test length(results_custom) == length(molecules)
     end
 
     @testset "Handle missing molecules" begin
         molecules_with_missing = Union{Molecule, Missing}[ethanol, missing, aspirin]
 
-        filtered = filter_molecules(molecules_with_missing)
-        @test any(ismissing, filtered)
-
-        detailed = filter_molecules(molecules_with_missing; return_detailed = true)
-        @test nrow(detailed) == 3
-        @test ismissing(detailed[2, :molecule_valid])
+        results = screen_molecules(molecules_with_missing)
+        @test length(results) == 3
+        @test ismissing(results[2]["molecule_valid"])
+        @test results[2]["index"] == 2
     end
 end
